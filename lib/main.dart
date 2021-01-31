@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flappy_search_bar/flappy_search_bar.dart';
 
+import 'src/notes_editor.dart';
+
 void main() {
   runApp(MyApp());
 }
+
 
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.
@@ -15,6 +18,9 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
       ),
       home: MyHomePage(),
+      routes: {
+        "/notes_editor": (context) => NotesEditorPage(),
+      },
     );
   }
 }
@@ -59,6 +65,17 @@ class _MyHomePageState extends State<MyHomePage> {
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
+      switch (index) {
+        case 0:
+          break;
+
+        case 1:
+          Navigator.of(context).pushNamed("/notes_editor");
+          break;
+
+        case 2:
+          break;
+      }
     });
   }
 

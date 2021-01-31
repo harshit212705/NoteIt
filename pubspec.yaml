@@ -29,6 +29,18 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.2
   flappy_search_bar: 1.4.1
+  path_provider: ^1.6.22
+#  zefyr: ^0.12.0
+  quill_delta: ^2.0.0
+  flushbar: ^1.10.4
+  image_picker: ^0.6.7+12
+  photo_view: ^0.10.2
+  cached_network_image: ^2.3.3
+#  html_editor: ^1.0.1
+  flutter_summernote: ^0.1.0
+#  flutter_quill: ^0.2.2
+#  image: ^2.1.18
+  flutter_image_compress: ^0.7.0
 
 dev_dependencies:
   flutter_test:
