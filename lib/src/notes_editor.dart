@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flushbar/flushbar.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:noteit/src/custom_flutter_summer_note_state.dart';
+import 'package:flutter_string_encryption/flutter_string_encryption.dart';
+import 'package:noteit/src/encrypt_key_keystore.dart';
 import 'dart:io';
 import 'dart:async';
 import 'dart:developer';
@@ -18,11 +20,14 @@ class _NotesEditorPageState extends State<NotesEditorPage> {
   final _scaffoldState = GlobalKey<ScaffoldState>();
   String result = "";
   String content = "";
-
+  var cryptor;
+  String encryptionKey;
 
   @override
   void initState() {
     super.initState();
+    cryptor = new PlatformStringCryptor();
+    encryptionKey = EncryptKeyFromKeystore.encryptionKey;
     readContent().then((val) {
       setState(() {
         content = val;
@@ -46,8 +51,14 @@ class _NotesEditorPageState extends State<NotesEditorPage> {
 
   Future<File> writeContent(String str) async {
     final file = await _localFile;
+
+    // log(encryptionKey);
+    // log(str);
+    // log(cryptor is PlatformStringCryptor ? 'Yes' : 'No');
+    final encrypted = await cryptor.encrypt(str, encryptionKey);
+    // log(encrypted);
     // Write the file
-    return file.writeAsString(str);
+    return file.writeAsString(encrypted);
   }
 
 
@@ -56,8 +67,15 @@ class _NotesEditorPageState extends State<NotesEditorPage> {
       final file = await _localFile;
       if (await file.exists()) {
         // Read the file
-        String contents = await file.readAsString();
-        return contents;
+        // log('a');
+        // log(encryptionKey);
+        String encrypted = await file.readAsString();
+        // log('b');
+        // log(encrypted);
+        final decrypted = await cryptor.decrypt(encrypted, encryptionKey);
+        // log('c');
+        // log(decrypted);
+        return decrypted;
       } else {
         return 'File not found!!';
       }

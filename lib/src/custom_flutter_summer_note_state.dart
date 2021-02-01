@@ -12,7 +12,6 @@ import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart';
 import 'package:webview_flutter/webview_flutter.dart';
-import 'package:image/image.dart' as Image;
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 
 
@@ -350,7 +349,7 @@ class CustomFlutterSummernoteState extends State<CustomFlutterSummernote> {
     List<int> imageBytes = await compressedImage.readAsBytes();
     String base64Image =
         "<img width=\"${widget.widthImage}\" src=\"data:image/png;base64, "
-        "${base64Encode(imageBytes)}\" data-filename=\"$filename\">";
+        "${base64Encode(imageBytes)}\" data-filename=\"$filename\"><br><br>";
 
     String txt =
         "\$('.note-editable').append( '" + base64Image + "');";

@@ -1,10 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flappy_search_bar/flappy_search_bar.dart';
+import 'package:noteit/src/encrypt_key_keystore.dart';
+import 'dart:async';
+import 'dart:developer';
+
 
 import 'src/notes_editor.dart';
 
-void main() {
+void main() async {
   runApp(MyApp());
+
+    EncryptKeyFromKeystore keyGenerationObj = new EncryptKeyFromKeystore();
+    await keyGenerationObj.generateEncryptionKey();
+    // String encryptionKey = EncryptKeyFromKeystore.encryptionKey;
+
 }
 
 
