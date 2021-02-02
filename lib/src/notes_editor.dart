@@ -4,14 +4,22 @@ import 'package:path_provider/path_provider.dart';
 import 'package:noteit/src/custom_flutter_summer_note_state.dart';
 import 'package:flutter_string_encryption/flutter_string_encryption.dart';
 import 'package:noteit/src/encrypt_key_keystore.dart';
+import 'package:noteit/src/Database.dart';
+import 'package:noteit/src/NotesModel.dart';
 import 'dart:io';
 import 'dart:async';
 import 'dart:developer';
 
 
 class NotesEditorPage extends StatefulWidget {
+  int noteId;
+
+  NotesEditorPage(int noteId) {
+    this.noteId = noteId;
+  }
+
   @override
-  _NotesEditorPageState createState() => _NotesEditorPageState();
+  _NotesEditorPageState createState() => _NotesEditorPageState(noteId);
 }
 
 class _NotesEditorPageState extends State<NotesEditorPage> {
@@ -22,6 +30,18 @@ class _NotesEditorPageState extends State<NotesEditorPage> {
   String content = "";
   var cryptor;
   String encryptionKey;
+  int notesFileNumber;
+
+  _NotesEditorPageState(int noteId) {
+    this.notesFileNumber = noteId;
+    if (notesFileNumber == 0) {
+      generateNewNote();
+    }
+  }
+
+  void generateNewNote() async {
+    notesFileNumber = await DBProvider.db.newNote();
+  }
 
   @override
   void initState() {
@@ -45,18 +65,14 @@ class _NotesEditorPageState extends State<NotesEditorPage> {
 
   Future<File> get _localFile async {
     final path = await _localPath;
-    return File('$path/summer.txt');
+    return File('$path/$notesFileNumber.txt');
   }
 
 
   Future<File> writeContent(String str) async {
     final file = await _localFile;
 
-    // log(encryptionKey);
-    // log(str);
-    // log(cryptor is PlatformStringCryptor ? 'Yes' : 'No');
     final encrypted = await cryptor.encrypt(str, encryptionKey);
-    // log(encrypted);
     // Write the file
     return file.writeAsString(encrypted);
   }
@@ -67,72 +83,144 @@ class _NotesEditorPageState extends State<NotesEditorPage> {
       final file = await _localFile;
       if (await file.exists()) {
         // Read the file
-        // log('a');
-        // log(encryptionKey);
         String encrypted = await file.readAsString();
-        // log('b');
-        // log(encrypted);
         final decrypted = await cryptor.decrypt(encrypted, encryptionKey);
-        // log('c');
-        // log(decrypted);
         return decrypted;
       } else {
-        return 'File not found!!';
+        return '';
       }
     } catch (e) {
       // If there is an error reading, return a default String
-      return 'Error';
+      return '';
     }
+  }
+
+
+  Future<int> deleteFile() async {
+    try {
+      final file = await _localFile;
+
+      await file.delete();
+      return 1;
+    } catch (e) {
+      return 0;
+    }
+  }
+
+
+  Future<bool> _onWillPop() async {
+    return (await showDialog(
+      context: context,
+      builder: (context) => new AlertDialog(
+        title: new Text('Are you sure?'),
+        content: new Text('Do you want to exit'),
+        actions: <Widget>[
+          new TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: new Text('No'),
+          ),
+          new TextButton(
+            onPressed: () async {
+              final value = await _keyEditor.currentState.getText();
+              if (value == '') {
+                DBProvider.db.deleteNote(notesFileNumber);
+                deleteFile();
+              }
+              else {
+                DBProvider.db.updateNote(notesFileNumber);
+                writeContent(value).then((_) {
+                  // notes data written to file
+                });
+              }
+              Navigator.of(context).pop(true);
+            },
+            child: new Text('Yes'),
+          ),
+        ],
+      ),
+    )) ?? false;
   }
 
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      key: _scaffoldState,
-      backgroundColor: Colors.white,
-      body: SafeArea(
-          child: Column(children: [
-            Container(
-              // padding: const EdgeInsets.all(32),
-              child: Row(children: <Widget>[
-                Expanded(
-                    child: Align(
-                        alignment: Alignment.centerRight,
-                        child: Builder(
-                          builder: (context) =>
-                              IconButton(
-                                icon: Icon(Icons.save),
-                                onPressed: () async {
-                                  final value = await _keyEditor.currentState.getText();
-                                  writeContent(value).then((_) {
-                                    Flushbar(
-                                      message: "Saved!!",
-                                      duration: Duration(seconds: 3),
-                                    )..show(context);
-                                  });
-                                },
-                              ),
-                        )))
-              ]),
-            ),
-            Expanded(
-              child: CustomFlutterSummernote(
-                // hint: "Your text here...",
-                key: _keyEditor,
-                value: content,
-                // hasAttachment: false,
-                customToolbar: """
-            [
-              ['style', ['bold', 'italic', 'underline', 'clear']],
-              ['font', ['strikethrough', 'superscript', 'subscript']],
-              ['insert', ['link', 'table', 'hr']]
-            ]
-          """,
+    return WillPopScope(
+        onWillPop: _onWillPop,
+        child: Scaffold(
+        key: _scaffoldState,
+        backgroundColor: Colors.white,
+        body: SafeArea(
+            child: Column(children: [
+              Container(
+                // padding: const EdgeInsets.all(32),
+                child: Row(children: <Widget>[
+                  Expanded(
+                      child: Align(
+                          alignment: Alignment.centerLeft,
+                          child: Builder(
+                            builder: (context) =>
+                                IconButton(
+                                  icon: Icon(Icons.arrow_back),
+                                  onPressed: () async {
+                                    final value = await _keyEditor.currentState.getText();
+                                    // add condition here if value == '' then delete the created note file and remove data from database
+                                    if (value == '') {
+                                      DBProvider.db.deleteNote(notesFileNumber);
+                                      deleteFile();
+                                    }
+                                    else {
+                                      DBProvider.db.updateNote(notesFileNumber);
+                                      writeContent(value).then((_) {
+                                        // notes data written to file
+                                      });
+                                    }
+                                    Navigator.of(context).pop(true);
+                                  },
+                                ),
+                          )
+                      )
+                  ),
+                  Spacer(),
+                  Expanded(
+                      child: Align(
+                          alignment: Alignment.centerRight,
+                          child: Builder(
+                            builder: (context) =>
+                                IconButton(
+                                  icon: Icon(Icons.save),
+                                  onPressed: () async {
+                                    final value = await _keyEditor.currentState.getText();
+                                    writeContent(value).then((_) {
+                                      Flushbar(
+                                        message: "Saved!!",
+                                        duration: Duration(seconds: 3),
+                                      )..show(context);
+                                    });
+                                  },
+                                ),
+                          )
+                      )
+                  ),
+                ]),
               ),
-            )
-          ]
-        )
+              Expanded(
+                child: CustomFlutterSummernote(
+                  // hint: "Your text here...",
+                  key: _keyEditor,
+                  value: content,
+                  // hasAttachment: false,
+                  customToolbar: """
+              [
+                ['style', ['bold', 'italic', 'underline', 'clear']],
+                ['font', ['strikethrough', 'superscript', 'subscript']],
+                ['insert', ['link', 'table', 'hr']]
+              ]
+            """,
+                ),
+              )
+            ]
+          )
+        ),
       ),
     );
   }

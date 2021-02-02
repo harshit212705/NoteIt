@@ -27,9 +27,6 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
       ),
       home: MyHomePage(),
-      routes: {
-        "/notes_editor": (context) => NotesEditorPage(),
-      },
     );
   }
 }
@@ -79,7 +76,11 @@ class _MyHomePageState extends State<MyHomePage> {
           break;
 
         case 1:
-          Navigator.of(context).pushNamed("/notes_editor");
+          int id = 0;
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => NotesEditorPage(id)),
+          );
           break;
 
         case 2:
@@ -95,6 +96,7 @@ class _MyHomePageState extends State<MyHomePage> {
       children: [
         Expanded(
           child: Column(
+            // mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Container(
@@ -152,9 +154,11 @@ class _MyHomePageState extends State<MyHomePage> {
     return Scaffold(
       body: SafeArea(
           child: Column(
+              // mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 topSection,
                 Container(
+                  height: 80,
                     child: Expanded(
                         child: Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -171,6 +175,36 @@ class _MyHomePageState extends State<MyHomePage> {
                           )
                         )
                     ),
+                ),
+                Container(
+                  child: Expanded(
+                      child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 20),
+                          child: DefaultTabController(
+                            length: 3,
+                            child: Scaffold(
+                              appBar: TabBar(
+                                labelColor: Colors.black,
+                                isScrollable: true,
+                                unselectedLabelColor: Colors.black.withOpacity(0.3),
+                                indicatorColor: Colors.blue,
+                                tabs: [
+                                  Tab(text: 'FIRST'),
+                                  Tab(text: 'SECOND',),
+                                  Tab(text: 'THIRD'),
+                                ],
+                              ),
+                              body: TabBarView(
+                                children: [
+                                  FirstScreen(),
+                                  SecondScreen(),
+                                  ThirdScreen()
+                                ],
+                              ),
+                            ),
+                          ),
+                      )
+                  ),
                 ),
               ]
           )
@@ -201,6 +235,55 @@ class _MyHomePageState extends State<MyHomePage> {
         // selectedItemColor: Colors.amber[800],
         onTap: _onItemTapped,
       ),
+    );
+  }
+}
+
+
+class FirstScreen extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+        debugShowCheckedModeBanner: false,
+        home: Scaffold(
+            body: Center(
+                child:
+                Text('First Activity Screen',
+                  style: TextStyle(fontSize: 21),)
+            )
+        )
+    );
+  }
+}
+
+class SecondScreen extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+        debugShowCheckedModeBanner: false,
+        home: Scaffold(
+            body: Center(
+                child:
+                Text('Second Activity Screen',
+                  style: TextStyle(fontSize: 21),)
+            )
+        )
+    );
+  }
+}
+
+class ThirdScreen extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+        debugShowCheckedModeBanner: false,
+        home: Scaffold(
+            body: Center(
+                child:
+                Text('Third Activity Screen',
+                  style: TextStyle(fontSize: 21),)
+            )
+        )
     );
   }
 }
