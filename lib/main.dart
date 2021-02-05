@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flappy_search_bar/flappy_search_bar.dart';
 import 'package:noteit/src/encrypt_key_keystore.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'dart:async';
 import 'dart:developer';
 
-
-import 'src/notes_editor.dart';
+import 'package:noteit/src/Database.dart';
+import 'package:noteit/src/NotesModel.dart';
+import 'package:noteit/src/notes_editor.dart';
 
 void main() async {
   runApp(MyApp());
@@ -29,14 +31,6 @@ class MyApp extends StatelessWidget {
       home: MyHomePage(),
     );
   }
-}
-
-
-class Note {
-  final String title;
-  final String description;
-
-  Note(this.title, this.description);
 }
 
 
@@ -80,7 +74,9 @@ class _MyHomePageState extends State<MyHomePage> {
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => NotesEditorPage(id)),
-          );
+          ).then((value) => {
+            setState(() {}),
+          });
           break;
 
         case 2:
@@ -125,12 +121,13 @@ class _MyHomePageState extends State<MyHomePage> {
   );
 
 
-  Future<List<Note>> search(String search) async {
+  Future<List<Notes>> search(String search) async {
     await Future.delayed(Duration(seconds: 2));
     return List.generate(search.length, (int index) {
-      return Note(
-        "Title : $search $index",
-        "Description :$search $index",
+      return new Notes(
+        id: 0,
+        createdOn: DateTime.now(),
+        lastEditedOn: DateTime.now(),
       );
     });
   }
@@ -162,14 +159,14 @@ class _MyHomePageState extends State<MyHomePage> {
                     child: Expanded(
                         child: Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 20),
-                            child: SearchBar<Note>(
+                            child: SearchBar<Notes>(
                             onSearch: search,
                             hintText: "Search Notes",
                             icon: Icon(Icons.search, size: 30.0,),
-                            onItemFound: (Note note, int index) {
+                            onItemFound: (Notes note, int index) {
                               return ListTile(
-                                title: Text(note.title),
-                                subtitle: Text(note.description),
+                                title: Text(note.id.toString()),
+                                subtitle: Text(note.createdOn.toString()),
                               );
                             },
                           )
@@ -189,14 +186,14 @@ class _MyHomePageState extends State<MyHomePage> {
                                 unselectedLabelColor: Colors.black.withOpacity(0.3),
                                 indicatorColor: Colors.blue,
                                 tabs: [
-                                  Tab(text: 'FIRST'),
+                                  Tab(text: 'Notes'),
                                   Tab(text: 'SECOND',),
                                   Tab(text: 'THIRD'),
                                 ],
                               ),
                               body: TabBarView(
                                 children: [
-                                  FirstScreen(),
+                                  FirstScreen(context),
                                   SecondScreen(),
                                   ThirdScreen()
                                 ],
@@ -240,18 +237,144 @@ class _MyHomePageState extends State<MyHomePage> {
 }
 
 
-class FirstScreen extends StatelessWidget {
+
+class FirstScreen extends StatefulWidget {
+  BuildContext mainContext;
+
+  FirstScreen(BuildContext context) {
+    this.mainContext = context;
+  }
+
+  @override
+  _FirstScreenState createState() => _FirstScreenState();
+}
+
+
+class _FirstScreenState extends State<FirstScreen> {
+
+   void refreshState() {
+    setState(() {
+    });
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
         debugShowCheckedModeBanner: false,
         home: Scaffold(
-            body: Center(
-                child:
-                Text('First Activity Screen',
-                  style: TextStyle(fontSize: 21),)
-            )
-        )
+          body: FutureBuilder(
+            future: DBProvider.db.getAllNotes(),
+            builder: (BuildContext context, AsyncSnapshot<List<Notes>> snapshot) {
+              if (snapshot.hasData) {
+                int index = 0;
+                return Padding(
+                  padding: const EdgeInsets.all(4.0),
+                  //this is what you actually need
+                  child: StaggeredGridView.countBuilder(
+                    crossAxisCount: 4, // I only need two card horizontally
+                    itemCount: snapshot.data.length,
+                    padding: const EdgeInsets.all(2.0),
+                    itemBuilder: (BuildContext context, int index) => NotesCard(snapshot.data[index], widget.mainContext, index, this),
+                    // children: snapshot.data.map<Widget>((item) {
+                    //   //Do you need to go somewhere when you tap on this card, wrap using InkWell and add your route
+                    //   return NotesCard(item, widget.mainContext, index++);
+                    // }).toList(),
+
+                    //Here is the place that we are getting flexible/ dynamic card for various images
+                    // staggeredTiles: snapshot.data
+                    //     .map<StaggeredTile>((_) => StaggeredTile.fit(2))
+                    //     .toList(),
+                    staggeredTileBuilder: (int index) => new StaggeredTile.fit(2),
+                    mainAxisSpacing: 4.0,
+                    crossAxisSpacing: 4.0, // add some space
+                  ),
+                );
+              }
+
+              // if (snapshot.hasData) {
+              //   return GridView.builder(
+              //     itemCount: snapshot.data.length,
+              //     gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount:2),
+              //     itemBuilder: (BuildContext context, int index) {
+              //       Notes item = snapshot.data[index];
+              //       return GestureDetector(
+              //         onTap: () => {
+              //           Navigator.push(
+              //             widget.mainContext,
+              //             MaterialPageRoute(builder: (context) => NotesEditorPage(item.id)),
+              //           ).then((value) => {
+              //             setState(() {}),
+              //           }),
+              //         },
+              //         child: Container(
+              //           margin:EdgeInsets.symmetric(vertical: 5, horizontal: 10),
+              //           decoration: BoxDecoration(
+              //             color: colorList[index%(colorList.length)],
+              //             // border: Border.all(
+              //             //     color: Colors.blueAccent,
+              //             //     width: 2
+              //             // ),
+              //             borderRadius: BorderRadius.all(
+              //                 Radius.circular(10.0) //                 <--- border radius here
+              //             ),
+              //             // boxShadow: [BoxShadow(blurRadius: 10,color: Colors.black,offset: Offset(1,3))]
+              //           ),
+              //           child: Center(
+              //             child: Column(
+              //               children: [
+              //                 Text(item.createdOn.toString()),
+              //                 Text(item.id.toString()),
+              //                 Text(item.lastEditedOn.toString()),
+              //               ]
+              //               // Checkbox(
+              //               //   onChanged: (bool value) {
+              //               //     DBProvider.db.blockClient(item);
+              //               //     setState(() {});
+              //               //   },
+              //               //   value: item.blocked,
+              //               // ),
+              //             ),
+              //           ),
+              //         ),
+              //       );
+              //     },
+              //   );
+              //   // return ListView.builder(
+              //   //   itemCount: snapshot.data.length,
+              //   //   itemBuilder: (BuildContext context, int index) {
+              //   //     Notes item = snapshot.data[index];
+              //   //     return GestureDetector(
+              //   //       onTap: () => {
+              //   //         Navigator.push(
+              //   //           widget.mainContext,
+              //   //           MaterialPageRoute(builder: (context) => NotesEditorPage(item.id)),
+              //   //         ).then((value) => {
+              //   //             setState(() {}),
+              //   //         }),
+              //   //       },
+              //   //       child: ListTile(
+              //   //         title: Text(item.createdOn.toString()),
+              //   //         leading: Text(item.id.toString()),
+              //   //         trailing: Text(item.lastEditedOn.toString()),
+              //   //         // Checkbox(
+              //   //         //   onChanged: (bool value) {
+              //   //         //     DBProvider.db.blockClient(item);
+              //   //         //     setState(() {});
+              //   //         //   },
+              //   //         //   value: item.blocked,
+              //   //         // ),
+              //   //       ),
+              //   //     );
+              //   //   },
+              //   // );
+              // }
+              else {
+                return Center(child: CircularProgressIndicator());
+              }
+            },
+          ),
+        ),
     );
   }
 }
@@ -284,6 +407,72 @@ class ThirdScreen extends StatelessWidget {
                   style: TextStyle(fontSize: 21),)
             )
         )
+    );
+  }
+}
+
+
+class NotesCard extends StatefulWidget {
+  Notes item;
+  int index;
+  BuildContext mainContext;
+  _FirstScreenState parent;
+
+  NotesCard(this.item, this.mainContext, this.index, this.parent);
+
+  @override
+  _NotesCardState createState() => _NotesCardState();
+}
+
+class _NotesCardState extends State<NotesCard> {
+
+  List<Color> colorList = [Color(0xffd3e0ea), Color(0xffe3d0b9), Color(0xffffdcdc), Color(0xffdfe0df), Color(0xffbee5d3), Color(0xffbc6ff1),
+    Color(0xffe6d5b8), Color(0xff99a8b2), Color(0xff9ab3f5), Color(0xffffd5cd)];
+
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () => {
+        Navigator.push(
+          widget.mainContext,
+          MaterialPageRoute(builder: (context) => NotesEditorPage(widget.item.id)),
+        ).then((value) => {
+          this.widget.parent.setState(() {
+
+          }),
+        }),
+      },
+      child: Container(
+        margin:EdgeInsets.symmetric(vertical: 5, horizontal: 10),
+        decoration: BoxDecoration(
+          color: colorList[widget.index%(colorList.length)],
+          // border: Border.all(
+          //     color: Colors.blueAccent,
+          //     width: 2
+          // ),
+          borderRadius: BorderRadius.all(
+              Radius.circular(10.0) //                 <--- border radius here
+          ),
+          // boxShadow: [BoxShadow(blurRadius: 10,color: Colors.black,offset: Offset(1,3))]
+        ),
+        child: Center(
+          child: Column(
+              children: [
+                Text(widget.item.createdOn.toString()),
+                Text(widget.item.id.toString()),
+                Text(widget.item.lastEditedOn.toString()),
+              ]
+            // Checkbox(
+            //   onChanged: (bool value) {
+            //     DBProvider.db.blockClient(item);
+            //     setState(() {});
+            //   },
+            //   value: item.blocked,
+            // ),
+          ),
+        ),
+      ),
     );
   }
 }

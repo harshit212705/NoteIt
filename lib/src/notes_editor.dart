@@ -163,7 +163,6 @@ class _NotesEditorPageState extends State<NotesEditorPage> {
                                   icon: Icon(Icons.arrow_back),
                                   onPressed: () async {
                                     final value = await _keyEditor.currentState.getText();
-                                    // add condition here if value == '' then delete the created note file and remove data from database
                                     if (value == '') {
                                       DBProvider.db.deleteNote(notesFileNumber);
                                       deleteFile();
@@ -190,10 +189,11 @@ class _NotesEditorPageState extends State<NotesEditorPage> {
                                   icon: Icon(Icons.save),
                                   onPressed: () async {
                                     final value = await _keyEditor.currentState.getText();
+                                    DBProvider.db.updateNote(notesFileNumber);
                                     writeContent(value).then((_) {
                                       Flushbar(
                                         message: "Saved!!",
-                                        duration: Duration(seconds: 3),
+                                        duration: Duration(seconds: 1),
                                       )..show(context);
                                     });
                                   },

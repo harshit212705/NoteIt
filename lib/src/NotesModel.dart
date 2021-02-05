@@ -11,8 +11,8 @@ class Notes {
 
   factory Notes.fromMap(Map<String, dynamic> json) => new Notes(
     id: json["id"],
-    createdOn: json["createdOn"],
-    lastEditedOn: json["lastEditedOn"],
+    createdOn: DateTime.parse(json["createdOn"]),
+    lastEditedOn: DateTime.parse(json["lastEditedOn"]),
   );
 
   Map<String, dynamic> toMap() => {
