@@ -8,6 +8,8 @@ import 'dart:developer';
 import 'package:noteit/src/Database.dart';
 import 'package:noteit/src/NotesModel.dart';
 import 'package:noteit/src/notes_editor.dart';
+import 'package:noteit/src/NotesCard.dart';
+
 
 void main() async {
   runApp(MyApp());
@@ -61,6 +63,7 @@ class _MyHomePageState extends State<MyHomePage> {
       style: optionStyle,
     ),
   ];
+
 
   void _onItemTapped(int index) {
     setState(() {
@@ -176,7 +179,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 Container(
                   child: Expanded(
                       child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 20),
+                          padding: const EdgeInsets.symmetric(horizontal: 5),
                           child: DefaultTabController(
                             length: 3,
                             child: Scaffold(
@@ -193,7 +196,7 @@ class _MyHomePageState extends State<MyHomePage> {
                               ),
                               body: TabBarView(
                                 children: [
-                                  FirstScreen(context),
+                                  FirstScreen(context, this),
                                   SecondScreen(),
                                   ThirdScreen()
                                 ],
@@ -240,10 +243,9 @@ class _MyHomePageState extends State<MyHomePage> {
 
 class FirstScreen extends StatefulWidget {
   BuildContext mainContext;
+  _MyHomePageState root;
 
-  FirstScreen(BuildContext context) {
-    this.mainContext = context;
-  }
+  FirstScreen(this.mainContext, this.root);
 
   @override
   _FirstScreenState createState() => _FirstScreenState();
@@ -252,9 +254,8 @@ class FirstScreen extends StatefulWidget {
 
 class _FirstScreenState extends State<FirstScreen> {
 
-   void refreshState() {
-    setState(() {
-    });
+  refresh() {
+    setState(() {});
   }
 
 
@@ -275,7 +276,7 @@ class _FirstScreenState extends State<FirstScreen> {
                     crossAxisCount: 4, // I only need two card horizontally
                     itemCount: snapshot.data.length,
                     padding: const EdgeInsets.all(2.0),
-                    itemBuilder: (BuildContext context, int index) => NotesCard(snapshot.data[index], widget.mainContext, index, this),
+                    itemBuilder: (BuildContext context, int index) => NotesCard(notifyParent: refresh, item: snapshot.data[index], mainContext: widget.mainContext, index: index),
                     // children: snapshot.data.map<Widget>((item) {
                     //   //Do you need to go somewhere when you tap on this card, wrap using InkWell and add your route
                     //   return NotesCard(item, widget.mainContext, index++);
@@ -412,67 +413,3 @@ class ThirdScreen extends StatelessWidget {
 }
 
 
-class NotesCard extends StatefulWidget {
-  Notes item;
-  int index;
-  BuildContext mainContext;
-  _FirstScreenState parent;
-
-  NotesCard(this.item, this.mainContext, this.index, this.parent);
-
-  @override
-  _NotesCardState createState() => _NotesCardState();
-}
-
-class _NotesCardState extends State<NotesCard> {
-
-  List<Color> colorList = [Color(0xffd3e0ea), Color(0xffe3d0b9), Color(0xffffdcdc), Color(0xffdfe0df), Color(0xffbee5d3), Color(0xffbc6ff1),
-    Color(0xffe6d5b8), Color(0xff99a8b2), Color(0xff9ab3f5), Color(0xffffd5cd)];
-
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () => {
-        Navigator.push(
-          widget.mainContext,
-          MaterialPageRoute(builder: (context) => NotesEditorPage(widget.item.id)),
-        ).then((value) => {
-          this.widget.parent.setState(() {
-
-          }),
-        }),
-      },
-      child: Container(
-        margin:EdgeInsets.symmetric(vertical: 5, horizontal: 10),
-        decoration: BoxDecoration(
-          color: colorList[widget.index%(colorList.length)],
-          // border: Border.all(
-          //     color: Colors.blueAccent,
-          //     width: 2
-          // ),
-          borderRadius: BorderRadius.all(
-              Radius.circular(10.0) //                 <--- border radius here
-          ),
-          // boxShadow: [BoxShadow(blurRadius: 10,color: Colors.black,offset: Offset(1,3))]
-        ),
-        child: Center(
-          child: Column(
-              children: [
-                Text(widget.item.createdOn.toString()),
-                Text(widget.item.id.toString()),
-                Text(widget.item.lastEditedOn.toString()),
-              ]
-            // Checkbox(
-            //   onChanged: (bool value) {
-            //     DBProvider.db.blockClient(item);
-            //     setState(() {});
-            //   },
-            //   value: item.blocked,
-            // ),
-          ),
-        ),
-      ),
-    );
-  }
-}

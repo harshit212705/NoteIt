@@ -348,7 +348,7 @@ class CustomFlutterSummernoteState extends State<CustomFlutterSummernote> {
 
     List<int> imageBytes = await compressedImage.readAsBytes();
     String base64Image =
-        "<img width=\"${widget.widthImage}\" src=\"data:image/png;base64, "
+        "<img width=\"${widget.widthImage}\" src=\"data:image/png;base64,"
         "${base64Encode(imageBytes)}\" data-filename=\"$filename\"><br><br>";
 
     String txt =
