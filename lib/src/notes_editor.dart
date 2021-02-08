@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flushbar/flushbar.dart';
+// import 'package:flushbar/flushbar.dart';
+// import 'package:overlay_support/overlay_support.dart';
+import 'package:toast/toast.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:noteit/src/custom_flutter_summer_note_state.dart';
 import 'package:flutter_string_encryption/flutter_string_encryption.dart';
@@ -191,10 +193,11 @@ class _NotesEditorPageState extends State<NotesEditorPage> {
                                     final value = await _keyEditor.currentState.getText();
                                     DBProvider.db.updateNote(notesFileNumber);
                                     writeContent(value).then((_) {
-                                      Flushbar(
-                                        message: "Saved!!",
-                                        duration: Duration(seconds: 1),
-                                      )..show(context);
+                                      // Flushbar(
+                                      //   message: "Saved!!",
+                                      //   duration: Duration(seconds: 1),
+                                      // )..show(context);
+                                      Toast.show("Saved!!", context, duration: Toast.LENGTH_SHORT, gravity:  Toast.BOTTOM);
                                     });
                                   },
                                 ),

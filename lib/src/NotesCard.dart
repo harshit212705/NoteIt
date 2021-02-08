@@ -150,11 +150,29 @@ class _NotesCardState extends State<NotesCard> {
                       ),
                       Html(data: '<b>Image note</b>'),
                       // TextFormField(initialValue: Html(data: '$withoutImageData').toString(), maxLines: 2),
-                      Html(data: '$withoutImageData'),
+                      Container(
+                        constraints: BoxConstraints(minHeight: 50, maxHeight: 50),
+                        child: ClipRect(
+                          child: Html(data: '$withoutImageData'),
+                        ),
+                      ),
                     ]);
                   } else {
-                    return Center(
-                        child: Html(data: '${snapshot.data}')); // snapshot.data  :- get your object which is pass from your downloadData() function
+
+                    // formatting data without image
+                    var withoutImageData = snapshot.data.replaceAll(RegExp('<img[^>]*>'), "");
+                    withoutImageData = withoutImageData.replaceAll('<br>', "");
+                    withoutImageData = withoutImageData.replaceAll('<p></p>', "");
+                    withoutImageData = withoutImageData.replaceAll('<p><br/></p>', "");
+                    withoutImageData = withoutImageData.replaceAll('<p>', '<br>');
+                    withoutImageData = withoutImageData.replaceAll('</p>', "");
+
+                    return Container(
+                      constraints: BoxConstraints(minHeight: 50, maxHeight: 98),
+                      child: ClipRect(
+                        child: Html(data: '$withoutImageData'),
+                      ),
+                    ); // snapshot.data  :- get your object which is pass from your downloadData() function
                   }
                 } else {
                   return Center(child: CircularProgressIndicator());
