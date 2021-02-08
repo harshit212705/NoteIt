@@ -149,6 +149,7 @@ class _NotesCardState extends State<NotesCard> {
                         fit:BoxFit.fill
                       ),
                       Html(data: '<b>Image note</b>'),
+                      // TextFormField(initialValue: Html(data: '$withoutImageData').toString(), maxLines: 2),
                       Html(data: '$withoutImageData'),
                     ]);
                   } else {

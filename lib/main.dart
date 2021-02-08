@@ -159,21 +159,19 @@ class _MyHomePageState extends State<MyHomePage> {
                 topSection,
                 Container(
                   height: 80,
-                    child: Expanded(
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 20),
-                            child: SearchBar<Notes>(
-                            onSearch: search,
-                            hintText: "Search Notes",
-                            icon: Icon(Icons.search, size: 30.0,),
-                            onItemFound: (Notes note, int index) {
-                              return ListTile(
-                                title: Text(note.id.toString()),
-                                subtitle: Text(note.createdOn.toString()),
-                              );
-                            },
-                          )
-                        )
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                        child: SearchBar<Notes>(
+                        onSearch: search,
+                        hintText: "Search Notes",
+                        icon: Icon(Icons.search, size: 30.0,),
+                        onItemFound: (Notes note, int index) {
+                          return ListTile(
+                            title: Text(note.id.toString()),
+                            subtitle: Text(note.createdOn.toString()),
+                          );
+                        },
+                      )
                     ),
                 ),
                 Container(
